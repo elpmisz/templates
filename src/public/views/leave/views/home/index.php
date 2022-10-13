@@ -66,7 +66,7 @@ $approver = $Authorize->count([2, $user_id]);
                   <thead>
                     <tr>
                       <th width="10%">#</th>
-                      <th width="40%">ประเภทการลา</th>
+                      <th width="40%">ประเภทการลา <?php echo $user_id ?></th>
                       <th width="10%">สิทธิ์วันลา</th>
                       <th width="10%">สิทธิ์ที่ใช้</th>
                       <th width="10%">สิทธิ์คงเหลือ</th>

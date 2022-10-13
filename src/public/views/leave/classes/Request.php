@@ -58,7 +58,7 @@ class Request
     $stmt = $this->dbcon->prepare($sql);
     $stmt->execute($data);
     $row = $stmt->fetch();
-    return (!empty($row['diff']) ? $row['diff'] + 1 : 0);
+    return (isset($row['diff']) ? $row['diff'] + 1 : 0);
   }
 
   public function document_upload($tmp, $path)

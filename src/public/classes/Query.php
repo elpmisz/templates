@@ -59,4 +59,20 @@ class Query
     $stmt->execute();
     return $stmt->fetchColumn();
   }
+
+  public function leave_approve_auth($data)
+  {
+    $sql = "SELECT COUNT(*) FROM leave_authorize WHERE type_id = 2 AND user_id = ? AND status = 1";
+    $stmt = $this->dbcon->prepare($sql);
+    $stmt->execute($data);
+    return $stmt->fetchColumn();
+  }
+
+  public function leave_approve_count()
+  {
+    $sql = "SELECT COUNT(*) FROM leave_request WHERE status = 1";
+    $stmt = $this->dbcon->prepare($sql);
+    $stmt->execute();
+    return $stmt->fetchColumn();
+  }
 }

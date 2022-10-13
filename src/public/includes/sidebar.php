@@ -13,6 +13,14 @@ $group = (!empty($group) ? $group : "");
       <a class="nav-link <?php echo ($group === "users" ? "" : "collapsed") ?>" data-bs-target="#users"
         data-bs-toggle="collapse" href="#">
         <i class="fa fa-user"></i> <span>ข้อมูลส่วนตัว</span>
+        <?php
+        $leave_approve_auth = $Query->leave_approve_auth([$user_id]);
+        $leave_approve_count = ($leave_approve_auth > 0 ? $Query->leave_approve_count() : 0);
+        if ($leave_approve_count > 0) :
+          echo ($leave_approve_count === 0 ? ""
+            : "<span class='badge rounded-pill text-bg-danger ms-2'>{$leave_approve_count}</span>");
+        endif;
+        ?>
         <i class="fa fa-chevron-down ms-auto"></i>
       </a>
       <ul id="users" class="nav-content <?php echo ($group === "users" ? "show" : "collapse") ?>">
@@ -24,6 +32,12 @@ $group = (!empty($group) ? $group : "");
         <li>
           <a class="nav-link <?php echo ($page === "leave" ? "active" : "collapsed") ?>" href="/leave">
             <i class="fa fa-circle"></i> <span>ประวัติการลา</span>
+            <?php
+            if ($leave_approve_count > 0) :
+              echo ($leave_approve_count === 0 ? ""
+                : "<span class='badge rounded-pill text-bg-danger ms-2'>{$leave_approve_count}</span>");
+            endif;
+            ?>
           </a>
         </li>
       </ul>
