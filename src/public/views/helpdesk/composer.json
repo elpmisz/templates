@@ -1,0 +1,9 @@
+{
+  "name": "worachit.pa/helpdesk",
+  "autoload": {
+    "psr-4": {
+      "app\\": "./"
+    }
+  },
+  "require": {}
+}

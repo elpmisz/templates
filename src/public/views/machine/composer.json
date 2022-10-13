@@ -1,0 +1,9 @@
+{
+  "name": "worachit.pa/machine",
+  "autoload": {
+    "psr-4": {
+      "app\\": "./"
+    }
+  },
+  "require": {}
+}

@@ -1,0 +1,40 @@
+version: '1'
+services:
+  app:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: templates-app
+    restart: unless-stopped
+    working_dir: /var/www/
+    volumes:
+      - ../src:/var/www
+
+  server:
+    image: nginx:alpine
+    container_name: templates-server
+    restart: unless-stopped
+    ports:
+      - 8000:80
+    volumes:
+      - ../src:/var/www
+      - ./nginx:/etc/nginx/conf.d
+
+  database:
+    image: mariadb:latest
+    container_name: templates-database
+    restart: unless-stopped
+    ports:
+      - 3306:3306
+    environment:
+      MARIADB_ROOT_PASSWORD: P@ssw0rd#db
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: templates-phpmyadmin
+    restart: unless-stopped
+    ports:
+      - 8001:80
+    environment:
+      PMA_HOST: database
+  
