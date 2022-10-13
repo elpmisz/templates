@@ -1,11 +1,12 @@
 <?php
-
 $page = "leave";
 $group = "users";
 
 include_once(__DIR__ . "/../../../../includes/header.php");
 include_once(__DIR__ . "/../../../../includes/sidebar.php");
 
+$param = (isset($params) ? explode("/", $params) : "");
+$request = (isset($param[0]) ? $param[0] : "");
 ?>
 
 <main id="main" class="main">
@@ -138,7 +139,6 @@ $(".service").each(function() {
     }
   });
 });
-
 
 $(document).on("change", ".service", function() {
   let service = parseInt($(this).val());

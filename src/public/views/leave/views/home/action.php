@@ -17,8 +17,8 @@ $param2 = (isset($param[2]) ? $param[2] : "");
 
 $user_id = (isset($_SESSION['user_id']) ? $_SESSION['user_id'] : "");
 
-$Validation = new Validation();
 $Request = new Request();
+$Validation = new Validation();
 
 if ($action === "add") :
   try {

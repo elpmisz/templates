@@ -1,5 +1,6 @@
 <?php
 
+use app\classes\Authorize;
 use app\classes\Request;
 
 $page = "leave";
@@ -9,8 +10,10 @@ include_once(__DIR__ . "/../../../../includes/header.php");
 include_once(__DIR__ . "/../../../../includes/sidebar.php");
 require_once(__DIR__ . "/../../vendor/autoload.php");
 
-
 $Request = new Request();
+$Authorize = new Authorize();
+
+$approver = $Authorize->count([2, $user_id]);
 ?>
 
 <main id="main" class="main">
@@ -90,6 +93,7 @@ $Request = new Request();
             </div>
           </div>
 
+          <?php if ($approver > 0) : ?>
           <div class="card shadow mb-2">
             <div class="card-header">
               <h5 class="text-center">รายการที่รออนุมัติ</h5>
@@ -107,7 +111,7 @@ $Request = new Request();
                           <th width="20%">วันที่ลา</th>
                           <th width="10%">จำนวนวันลา</th>
                           <th width="30%">เหตุผล</th>
-                          <th width="20%">วันที่</th>
+                          <th width="20%">วันที่ใช้บริการ</th>
                         </tr>
                       </thead>
                     </table>
@@ -116,6 +120,7 @@ $Request = new Request();
               </div>
             </div>
           </div>
+          <?php endif; ?>
 
           <div class="card shadow mb-2">
             <div class="card-header">
@@ -134,7 +139,7 @@ $Request = new Request();
                           <th width="20%">วันที่ลา</th>
                           <th width="10%">จำนวนวันลา</th>
                           <th width="30%">เหตุผล</th>
-                          <th width="20%">วันที่</th>
+                          <th width="20%">วันที่ใช้บริการ</th>
                         </tr>
                       </thead>
                     </table>

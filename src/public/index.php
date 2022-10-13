@@ -214,6 +214,9 @@ $Router->map("GET", "/leave", function () {
 $Router->map("POST", "/leave/datarequest", function () {
   require(__DIR__ . "/views/leave/views/home/data_request.php");
 });
+$Router->map("POST", "/leave/dataapprove", function () {
+  require(__DIR__ . "/views/leave/views/home/data_approve.php");
+});
 $Router->map("GET", "/leave/manage", function () {
   require(__DIR__ . "/views/leave/views/home/manage.php");
 });
@@ -222,6 +225,12 @@ $Router->map("GET", "/leave/request", function () {
 });
 $Router->map("GET", "/leave/view/[**:params]", function ($params) {
   require(__DIR__ . "/views/leave/views/home/view.php");
+});
+$Router->map("GET", "/leave/approve/[**:params]", function ($params) {
+  require(__DIR__ . "/views/leave/views/home/approve.php");
+});
+$Router->map("GET", "/leave/complete/[**:params]", function ($params) {
+  require(__DIR__ . "/views/leave/views/home/complete.php");
 });
 $Router->map("POST", "/leave/request/[**:params]", function ($params) {
   require(__DIR__ . "/views/leave/views/home/action.php");

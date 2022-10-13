@@ -9,7 +9,7 @@ class Database
 {
   private $dbCon = null;
   private $dbHost = "database";
-  private $dbUser = "templates";
+  private $dbUser = "root";
   private $dbPass = "P@ssw0rd#db";
   private $dbName = "templates";
   private $dbChar = "utf8";
