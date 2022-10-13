@@ -26,6 +26,7 @@ services:
     restart: unless-stopped
     ports:
       - 3306:3306
+    command: ['--sql_mode=']
     environment:
       MARIADB_ROOT_PASSWORD: P@ssw0rd#db
 
