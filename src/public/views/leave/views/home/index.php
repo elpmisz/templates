@@ -14,6 +14,7 @@ $Request = new Request();
 $Authorize = new Authorize();
 
 $approver = $Authorize->count([2, $user_id]);
+$approve_count = $Request->approve_count();
 ?>
 
 <main id="main" class="main">
@@ -33,11 +34,11 @@ $approver = $Authorize->count([2, $user_id]);
               </a>
             </div>
             <?php if ($user['level'] === 9) : ?>
-            <div class="col-xl-3 col-md-6 mb-2">
-              <a href="/leave/manage" class="btn btn-primary btn-sm w-100">
-                <i class="fa fa-bars pe-2"></i>จัดการระบบ
-              </a>
-            </div>
+              <div class="col-xl-3 col-md-6 mb-2">
+                <a href="/leave/manage" class="btn btn-primary btn-sm w-100">
+                  <i class="fa fa-bars pe-2"></i>จัดการระบบ
+                </a>
+              </div>
             <?php endif; ?>
 
             <div class="col-xl-3 col-md-6">
@@ -79,13 +80,13 @@ $approver = $Authorize->count([2, $user_id]);
                       $key++;
                       $used = $Request->service_used([$user_id, $service['id'], date("Y")]);
                     ?>
-                    <tr>
-                      <td class="text-center"><?php echo $key ?></td>
-                      <td><?php echo $service['name'] ?></td>
-                      <td class="text-center text-primary"><?php echo $service['day'] ?></td>
-                      <td class="text-center text-danger"><?php echo $used ?></td>
-                      <td class="text-center text-success"><?php echo ($service['day'] - $used) ?></td>
-                    </tr>
+                      <tr>
+                        <td class="text-center"><?php echo $key ?></td>
+                        <td><?php echo $service['name'] ?></td>
+                        <td class="text-center text-primary"><?php echo $service['day'] ?></td>
+                        <td class="text-center text-danger"><?php echo $used ?></td>
+                        <td class="text-center text-success"><?php echo ($service['day'] - $used) ?></td>
+                      </tr>
                     <?php endforeach; ?>
                   </tbody>
                 </table>
@@ -93,33 +94,33 @@ $approver = $Authorize->count([2, $user_id]);
             </div>
           </div>
 
-          <?php if ($approver > 0) : ?>
-          <div class="card shadow mb-2">
-            <div class="card-header">
-              <h5 class="text-center">รายการที่รออนุมัติ</h5>
-            </div>
+          <?php if ($approver > 0 && $approve_count > 0) : ?>
+            <div class="card shadow mb-2">
+              <div class="card-header">
+                <h5 class="text-center">รายการที่รออนุมัติ</h5>
+              </div>
 
-            <div class="card-body">
-              <div class="row my-3">
-                <div class="col-xl-12">
-                  <div class="table-responsive">
-                    <table class="table table-bordered table-hover table-sm approve w-100">
-                      <thead>
-                        <tr>
-                          <th width="10%">#</th>
-                          <th width="10%">ประเภท</th>
-                          <th width="20%">วันที่ลา</th>
-                          <th width="10%">จำนวนวันลา</th>
-                          <th width="30%">เหตุผล</th>
-                          <th width="20%">วันที่ใช้บริการ</th>
-                        </tr>
-                      </thead>
-                    </table>
+              <div class="card-body">
+                <div class="row my-3">
+                  <div class="col-xl-12">
+                    <div class="table-responsive">
+                      <table class="table table-bordered table-hover table-sm approve w-100">
+                        <thead>
+                          <tr>
+                            <th width="10%">#</th>
+                            <th width="10%">ประเภท</th>
+                            <th width="20%">วันที่ลา</th>
+                            <th width="10%">จำนวนวันลา</th>
+                            <th width="30%">เหตุผล</th>
+                            <th width="20%">วันที่ใช้บริการ</th>
+                          </tr>
+                        </thead>
+                      </table>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
           <?php endif; ?>
 
           <div class="card shadow mb-2">
@@ -159,71 +160,71 @@ $approver = $Authorize->count([2, $user_id]);
 include_once(__DIR__ . "/../../../../includes/footer.php");
 ?>
 <script>
-$(".data").DataTable({
-  serverSide: true,
-  scrollX: true,
-  searching: true,
-  order: [],
-  ajax: {
-    url: "/leave/datarequest",
-    type: "POST",
-  },
-  columnDefs: [{
-    targets: [0, 1, 2, 3, 5],
-    className: "text-center",
-  }],
-  oLanguage: {
-    sLengthMenu: "แสดง _MENU_ ลำดับ ต่อหน้า",
-    sZeroRecords: "ไม่พบข้อมูลที่ค้นหา",
-    sInfo: "แสดง _START_ ถึง _END_ ของ _TOTAL_ ลำดับ",
-    sInfoEmpty: "แสดง 0 ถึง 0 ของ 0 ลำดับ",
-    sInfoFiltered: "(จากทั้งหมด _MAX_ ลำดับ)",
-    sSearch: "ค้นหา :",
-    oPaginate: {
-      sFirst: "หน้าแรก",
-      sLast: "หน้าสุดท้าย",
-      sNext: "ถัดไป",
-      sPrevious: "ก่อนหน้า"
+  $(".data").DataTable({
+    serverSide: true,
+    scrollX: true,
+    searching: true,
+    order: [],
+    ajax: {
+      url: "/leave/datarequest",
+      type: "POST",
+    },
+    columnDefs: [{
+      targets: [0, 1, 2, 3, 5],
+      className: "text-center",
+    }],
+    oLanguage: {
+      sLengthMenu: "แสดง _MENU_ ลำดับ ต่อหน้า",
+      sZeroRecords: "ไม่พบข้อมูลที่ค้นหา",
+      sInfo: "แสดง _START_ ถึง _END_ ของ _TOTAL_ ลำดับ",
+      sInfoEmpty: "แสดง 0 ถึง 0 ของ 0 ลำดับ",
+      sInfoFiltered: "(จากทั้งหมด _MAX_ ลำดับ)",
+      sSearch: "ค้นหา :",
+      oPaginate: {
+        sFirst: "หน้าแรก",
+        sLast: "หน้าสุดท้าย",
+        sNext: "ถัดไป",
+        sPrevious: "ก่อนหน้า"
+      }
     }
-  }
-});
-
-$(".approve").DataTable({
-  serverSide: true,
-  scrollX: true,
-  searching: true,
-  order: [],
-  ajax: {
-    url: "/leave/dataapprove",
-    type: "POST",
-  },
-  columnDefs: [{
-    targets: [0, 1, 2, 3, 5],
-    className: "text-center",
-  }],
-  oLanguage: {
-    sLengthMenu: "แสดง _MENU_ ลำดับ ต่อหน้า",
-    sZeroRecords: "ไม่พบข้อมูลที่ค้นหา",
-    sInfo: "แสดง _START_ ถึง _END_ ของ _TOTAL_ ลำดับ",
-    sInfoEmpty: "แสดง 0 ถึง 0 ของ 0 ลำดับ",
-    sInfoFiltered: "(จากทั้งหมด _MAX_ ลำดับ)",
-    sSearch: "ค้นหา :",
-    oPaginate: {
-      sFirst: "หน้าแรก",
-      sLast: "หน้าสุดท้าย",
-      sNext: "ถัดไป",
-      sPrevious: "ก่อนหน้า"
-    }
-  }
-});
-
-$(".filter_year").each(function() {
-  $(this).select2({
-    containerCssClass: "select2--small",
-    dropdownCssClass: "select2--small",
-    dropdownParent: $(this).parent(),
-    width: "100%",
-    allowClear: true,
   });
-});
+
+  $(".approve").DataTable({
+    serverSide: true,
+    scrollX: true,
+    searching: true,
+    order: [],
+    ajax: {
+      url: "/leave/dataapprove",
+      type: "POST",
+    },
+    columnDefs: [{
+      targets: [0, 1, 2, 3, 5],
+      className: "text-center",
+    }],
+    oLanguage: {
+      sLengthMenu: "แสดง _MENU_ ลำดับ ต่อหน้า",
+      sZeroRecords: "ไม่พบข้อมูลที่ค้นหา",
+      sInfo: "แสดง _START_ ถึง _END_ ของ _TOTAL_ ลำดับ",
+      sInfoEmpty: "แสดง 0 ถึง 0 ของ 0 ลำดับ",
+      sInfoFiltered: "(จากทั้งหมด _MAX_ ลำดับ)",
+      sSearch: "ค้นหา :",
+      oPaginate: {
+        sFirst: "หน้าแรก",
+        sLast: "หน้าสุดท้าย",
+        sNext: "ถัดไป",
+        sPrevious: "ก่อนหน้า"
+      }
+    }
+  });
+
+  $(".filter_year").each(function() {
+    $(this).select2({
+      containerCssClass: "select2--small",
+      dropdownCssClass: "select2--small",
+      dropdownParent: $(this).parent(),
+      width: "100%",
+      allowClear: true,
+    });
+  });
 </script>

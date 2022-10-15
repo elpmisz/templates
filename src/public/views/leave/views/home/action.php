@@ -37,6 +37,37 @@ if ($action === "add") :
   }
 endif;
 
+if ($action === "update") :
+  try {
+    $request = (isset($_POST['request']) ? $Validation->input($_POST['request']) : "");
+    $text = (isset($_POST['text']) ? $Validation->input($_POST['text']) : "");
+    $date = (isset($_POST['date']) ? $Validation->input($_POST['date']) : "");
+    $conv = explode("-", $date);
+    $start = date("Y-m-d", strtotime(str_replace("/", "-", trim($conv[0]))));
+    $end = date("Y-m-d", strtotime(str_replace("/", "-", trim($conv[1]))));
+
+    $Request->update([$date, $start, $end, $text, $request]);
+
+    $Validation->alert("success", "แก้ไขข้อมูลเรียบร้อย", "/leave/view/{$request}");
+  } catch (PDOException $e) {
+    die($e->getMessage());
+  }
+endif;
+
+if ($action === "approve") :
+  try {
+    $request = (isset($_POST['request']) ? $Validation->input($_POST['request']) : "");
+    $status = (isset($_POST['status']) ? $Validation->input($_POST['status']) : "");
+    $remark = (isset($_POST['remark']) ? $Validation->input($_POST['remark']) : "");
+
+    $Request->approve([$user_id, $remark, $status, $request]);
+
+    $Validation->alert("success", "ดำเนินการเรียบร้อย", "/leave");
+  } catch (PDOException $e) {
+    die($e->getMessage());
+  }
+endif;
+
 if ($action === "service") :
   try {
     $keyword = (isset($_POST['q']) ? $Validation->input($_POST['q']) : "");

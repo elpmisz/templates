@@ -24,7 +24,8 @@ $limit_start = (isset($_POST['start']) ? $_POST['start'] : "");
 $limit_length = (isset($_POST['length']) ? $_POST['length'] : "");
 $draw = (isset($_POST['draw']) ? $_POST['draw'] : "");
 
-$sql = "SELECT A.id as request_id,A.date as request_date,A.text as request_text, DATEDIFF(A.end, A.start) + 1 as diff,
+$sql = "SELECT A.id as request_id,A.date as request_date,A.text as request_text,A.status,
+DATEDIFF(A.end, A.start) + 1 as diff,
 B.name as service_name,
 CONCAT('คุณ',C.name,' ',C.surname) as user_name,
 DATE_FORMAT(A.created, '%d/%m/%Y - %H:%i น.') as request_created,
@@ -58,7 +59,7 @@ if ($year) {
 if ($order) {
   $sql .= "ORDER BY {$column[$order_column]} {$order_dir} ";
 } else {
-  $sql .= "ORDER BY A.status ASC ";
+  $sql .= "ORDER BY A.status ASC, A.start DESC ";
 }
 
 $query = "";
@@ -75,7 +76,12 @@ $result = $stmt->fetchAll();
 
 $data = [];
 foreach ($result as $row) {
-  $status = "<a href='/leave/view/{$row['request_id']}' class='badge text-bg-{$row['status_color']} fw-lighter'>{$row['status_name']}</a>";
+  if ($row['status'] === 1) {
+    $status = "<a href='/leave/view/{$row['request_id']}' class='badge text-bg-{$row['status_color']} fw-lighter'>{$row['status_name']}</a>";
+  } else {
+    $status = "<a href='/leave/complete/{$row['request_id']}' class='badge text-bg-{$row['status_color']} fw-lighter'>{$row['status_name']}</a>";
+  }
+
   $data[] = [
     "0" => $status,
     "1" => $row['service_name'],

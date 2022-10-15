@@ -1,12 +1,22 @@
 <?php
+
+use app\classes\Request;
+
+use function Complex\ln;
+
 $page = "leave";
 $group = "users";
 
 include_once(__DIR__ . "/../../../../includes/header.php");
 include_once(__DIR__ . "/../../../../includes/sidebar.php");
+require_once(__DIR__ . "/../../vendor/autoload.php");
 
 $param = (isset($params) ? explode("/", $params) : "");
 $request = (isset($param[0]) ? $param[0] : "");
+
+$Request = new Request();
+$row = $Request->fetch([$request]);
+$remain = $Request->service_remain([$row['service_id']], [$row['user_id'], $row['service_id'], date("Y")]);
 ?>
 
 <main id="main" class="main">
@@ -15,25 +25,27 @@ $request = (isset($param[0]) ? $param[0] : "");
     <div class="col-xl-12">
       <div class="card shadow">
         <div class="card-header">
-          <h4 class="text-center">เพิ่ม</h4>
+          <h4 class="text-center">รายละเอียด</h4>
         </div>
         <div class="card-body">
-          <form action="/leave/request/add" method="POST" class="needs-validation" enctype="multipart/form-data"
-            novalidate>
+          <form action="/leave/request/update" method="POST" class="needs-validation" enctype="multipart/form-data" novalidate>
+            <div class="row mb-2" style="display: none;">
+              <label class="col-xl-4 col-md-4 col-form-label text-xl-end">รหัส</label>
+              <div class="col-xl-4 col-md-6">
+                <input type="text" class="form-control form-control-sm" name="request" value="<?php echo $row['id'] ?>" readonly>
+              </div>
+            </div>
             <div class="row mb-2">
               <label class="col-xl-4 col-md-4 col-form-label text-xl-end">ประเภทการลา</label>
               <div class="col-xl-4 col-md-6">
-                <select class="form-select form-select-sm service" name="service_id"
-                  data-placeholder="-- หัวข้อบริการ --" required></select>
-                <div class="invalid-feedback">
-                  กรุณาเลือกช่องนี้.
-                </div>
+                <input type="hidden" class="form-control form-control-sm service" value="<?php echo $row['service_id'] ?>" readonly>
+                <span class="form-control form-control-sm"><?php echo $row['service_name'] ?></span>
               </div>
             </div>
             <div class="row mb-2">
               <label class="col-xl-4 col-md-4 col-form-label text-xl-end">วันที่ลา</label>
               <div class="col-xl-4 col-md-6">
-                <input type="text" class="form-control form-control-sm calendar" name="date" value="" required>
+                <input type="text" class="form-control form-control-sm calendar" name="date" value="<?php echo $row['date'] ?>" required>
                 <div class="invalid-feedback">
                   กรุณาเลือก วันที่.
                 </div>
@@ -43,7 +55,7 @@ $request = (isset($param[0]) ? $param[0] : "");
               <label class="col-xl-4 col-md-4 col-form-label text-xl-end">สิทธิ์การลา (คงเหลือ)</label>
               <div class="col-xl-2 col-md-4">
                 <div class="input-group input-group-sm mb-3">
-                  <input type="number" class="form-control form-control-sm text-center used" readonly>
+                  <input type="number" class="form-control form-control-sm text-center used" value="<?php echo $remain ?>" readonly>
                   <span class="input-group-text">วัน</span>
                 </div>
               </div>
@@ -55,7 +67,7 @@ $request = (isset($param[0]) ? $param[0] : "");
               <label class="col-xl-4 col-md-4 col-form-label text-xl-end">ระยะเวลา</label>
               <div class="col-xl-2 col-md-4">
                 <div class="input-group input-group-sm mb-3">
-                  <input type="number" class="form-control form-control-sm text-center calc" readonly>
+                  <input type="number" class="form-control form-control-sm text-center calc" value="<?php echo $row['diff'] ?>" readonly>
                   <span class="input-group-text">วัน</span>
                 </div>
               </div>
@@ -63,7 +75,7 @@ $request = (isset($param[0]) ? $param[0] : "");
             <div class="row mb-2">
               <label class="col-xl-4 col-md-4 col-form-label text-xl-end">เหตุผลการลา</label>
               <div class="col-xl-5 col-md-7">
-                <textarea class="form-control form-control-sm" rows="3" name="text" required></textarea>
+                <textarea class="form-control form-control-sm" rows="3" name="text" required><?php echo $row['text'] ?></textarea>
                 <div class="invalid-feedback">
                   กรุณากรอกช่องนี้.
                 </div>
@@ -117,139 +129,111 @@ $request = (isset($param[0]) ? $param[0] : "");
 include_once(__DIR__ . "/../../../../includes/footer.php");
 ?>
 <script>
-$(".div_warning").hide();
-$(".service").each(function() {
-  $(this).select2({
-    containerCssClass: "select2--small",
-    dropdownCssClass: "select2--small",
-    dropdownParent: $(this).parent(),
-    width: "100%",
-    allowClear: true,
-    ajax: {
-      url: "/leave/request/service",
-      method: 'POST',
-      dataType: 'json',
-      delay: 100,
-      processResults: function(data) {
-        return {
-          results: data
-        };
-      },
-      cache: true
+  $(".div_warning").hide();
+
+  $(".calendar").on("keydown", function(e) {
+    e.preventDefault();
+  });
+
+  $(".calendar").daterangepicker({
+    autoUpdateInput: false,
+    showDropdowns: true,
+    // startDate: moment(),
+    // endDate: moment().add(1, 'days'),
+    locale: {
+      "format": "DD/MM/YYYY",
+      "applyLabel": "ยืนยัน",
+      "cancelLabel": "ยกเลิก",
+      "daysOfWeek": [
+        "อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"
+      ],
+      "monthNames": [
+        "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+        "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+      ]
+    },
+    "applyButtonClasses": "btn-success",
+    "cancelClass": "btn-danger"
+  });
+
+  $(".calendar").on("apply.daterangepicker", function(ev, picker) {
+    $(this).val(picker.startDate.format("DD/MM/YYYY") + ' - ' + picker.endDate.format("DD/MM/YYYY"));
+
+    let service = $(".service").val();
+    let date = $(this).val();
+    date = date.split("-").map(elm => elm.trim());
+    let start = new Date(date[0].split("/").reverse().join("-"));
+    start = new Date(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate(), start.getUTCHours(), start
+      .getUTCMinutes(), start.getUTCSeconds());
+    let end = new Date(date[1].split("/").reverse().join("-"));
+    end = new Date(end.getUTCFullYear(), end.getUTCMonth(), end.getUTCDate(), end.getUTCHours(), end.getUTCMinutes(),
+      end.getUTCSeconds());
+    let diff = new Date(end.getTime() - start.getTime());
+    diff = Math.round(diff / (1000 * 60 * 60 * 24));
+    $(".calc").val(diff + 1);
+
+
+    if (service) {
+      $.ajax({
+        url: '/leave/request/used',
+        method: 'POST',
+        data: {
+          service: service
+        },
+        dataType: 'json',
+        success: function(data) {
+          let used = parseInt(data);
+          $(".used").val(used);
+          if (used < parseInt(diff + 1)) {
+            $(".btn_submit").prop("disabled", true);
+            $(".div_warning").show();
+          } else {
+            $(".btn_submit").prop("disabled", false);
+            $(".div_warning").hide();
+          }
+        }
+      });
     }
   });
-});
 
-$(document).on("change", ".service", function() {
-  let service = parseInt($(this).val());
-  if (service) {
-    $(".calendar, .used, .calc").val("");
-  }
-});
-
-$(".calendar").on("keydown", function(e) {
-  e.preventDefault();
-});
-
-$(".calendar").daterangepicker({
-  autoUpdateInput: false,
-  showDropdowns: true,
-  startDate: moment(),
-  endDate: moment().add(1, 'days'),
-  locale: {
-    "format": "DD/MM/YYYY",
-    "applyLabel": "ยืนยัน",
-    "cancelLabel": "ยกเลิก",
-    "daysOfWeek": [
-      "อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"
-    ],
-    "monthNames": [
-      "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
-      "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
-    ]
-  },
-  "applyButtonClasses": "btn-success",
-  "cancelClass": "btn-danger"
-});
-
-$(".calendar").on("apply.daterangepicker", function(ev, picker) {
-  $(this).val(picker.startDate.format("DD/MM/YYYY") + ' - ' + picker.endDate.format("DD/MM/YYYY"));
-
-  let service = $(".service").val();
-  let date = $(this).val();
-  date = date.split("-").map(elm => elm.trim());
-  let start = new Date(date[0].split("/").reverse().join("-"));
-  start = new Date(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate(), start.getUTCHours(), start
-    .getUTCMinutes(), start.getUTCSeconds());
-  let end = new Date(date[1].split("/").reverse().join("-"));
-  end = new Date(end.getUTCFullYear(), end.getUTCMonth(), end.getUTCDate(), end.getUTCHours(), end.getUTCMinutes(),
-    end.getUTCSeconds());
-  let diff = new Date(end.getTime() - start.getTime());
-  diff = Math.round(diff / (1000 * 60 * 60 * 24));
-  $(".calc").val(diff + 1);
-
-
-  if (service) {
-    $.ajax({
-      url: '/leave/request/used',
-      method: 'POST',
-      data: {
-        service: service
-      },
-      dataType: 'json',
-      success: function(data) {
-        let used = parseInt(data);
-        $(".used").val(used);
-        if (used < parseInt(diff + 1)) {
-          $(".btn_submit").prop("disabled", true);
-          $(".div_warning").show();
-        } else {
-          $(".btn_submit").prop("disabled", false);
-          $(".div_warning").hide();
-        }
-      }
-    });
-  }
-});
-
-$(".calendar").on("cancel.daterangepicker", function(ev, picker) {
-  $(this).val("");
-});
-
-
-$(".decrease").hide();
-$(".increase").on("click", function() {
-  let row = $(".tr_file:last");
-  let clone = row.clone();
-  clone.find("input, select").val("");
-  clone.find(".increase").hide();
-  clone.find(".decrease").show();
-  clone.find(".decrease").on("click", function() {
-    $(this).closest("tr").remove();
+  $(".calendar").on("cancel.daterangepicker", function(ev, picker) {
+    $(this).val("");
   });
-  row.after(clone);
-  clone.show();
-});
 
-$(document).on("change", ".file", function() {
-  let size = $(this)[0].files[0].size / (1024 * 1024);
-  let extension = $(this).val().split('.').pop().toLowerCase();
-  let allow = ["doc", "docx", "xls", "xlsx", "pdf", "png", "jpg", "jpeg"];
-  size = size.toFixed(2);
-  if (size > 5) {
-    Swal.fire({
-      icon: "error",
-      title: "เฉพาะไฟล์ ขนาดไม่เกิน 5 Mb.",
-    })
-    $(this).val("");
-  }
 
-  if (!allow.includes(extension)) {
-    Swal.fire({
-      icon: "error",
-      title: "เฉพาะไฟล์เอกสาร WORD, EXCEL, PDF หรือไฟล์รูปภาพ PNG และ JPG เท่านั้น",
-    })
-    $(this).val("");
-  }
-});
+  $(".decrease").hide();
+  $(".increase").on("click", function() {
+    let row = $(".tr_file:last");
+    let clone = row.clone();
+    clone.find("input, select").val("");
+    clone.find(".increase").hide();
+    clone.find(".decrease").show();
+    clone.find(".decrease").on("click", function() {
+      $(this).closest("tr").remove();
+    });
+    row.after(clone);
+    clone.show();
+  });
+
+  $(document).on("change", ".file", function() {
+    let size = $(this)[0].files[0].size / (1024 * 1024);
+    let extension = $(this).val().split('.').pop().toLowerCase();
+    let allow = ["doc", "docx", "xls", "xlsx", "pdf", "png", "jpg", "jpeg"];
+    size = size.toFixed(2);
+    if (size > 5) {
+      Swal.fire({
+        icon: "error",
+        title: "เฉพาะไฟล์ ขนาดไม่เกิน 5 Mb.",
+      })
+      $(this).val("");
+    }
+
+    if (!allow.includes(extension)) {
+      Swal.fire({
+        icon: "error",
+        title: "เฉพาะไฟล์เอกสาร WORD, EXCEL, PDF หรือไฟล์รูปภาพ PNG และ JPG เท่านั้น",
+      })
+      $(this).val("");
+    }
+  });
 </script>

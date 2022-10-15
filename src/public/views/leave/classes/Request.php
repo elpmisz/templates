@@ -20,6 +20,69 @@ class Request
     return $stmt;
   }
 
+  public function fetch($data)
+  {
+    $sql = "SELECT A.*, DATEDIFF(end, start) + 1 as diff,
+    B.name as service_name,
+    CONCAT('คุณ',C.name,' ',C.surname,' - ',DATE_FORMAT(A.approve_datetime, '%d/%m/%Y - %H:%i น.')) approver,
+    CASE A.status
+      WHEN 1 THEN 'รออนุมัติ'
+      WHEN 2 THEN 'ผ่านการอนุมัติ'
+      WHEN 3 THEN 'รายการถูกยกเลิก'
+      ELSE NULL
+    END as status_name,
+    CASE A.status 
+      WHEN 1 THEN 'primary'
+      WHEN 2 THEN 'success'
+      WHEN 3 THEN 'danger'
+      ELSE NULL
+    END as status_color
+    FROM leave_request A 
+    LEFT JOIN leave_service B 
+    ON A.service_id = B.id
+    LEFT JOIN user_detail C
+    ON A.approver = C.id
+    WHERE A.id = ?";
+    $stmt = $this->dbcon->prepare($sql);
+    $stmt->execute($data);
+    return $stmt->fetch();
+  }
+
+  public function update($data)
+  {
+    $sql = "UPDATE leave_request SET
+    date = ?,
+    start = ?,
+    end = ?,
+    text = ?,
+    updated = NOW()
+    WHERE id = ?";
+    $stmt = $this->dbcon->prepare($sql);
+    $stmt->execute($data);
+    return $stmt;
+  }
+
+  public function approve($data)
+  {
+    $sql = "UPDATE leave_request SET
+    approver = ?,
+    approve_datetime = NOW(),
+    remark = ?,
+    status = ?
+    WHERE id = ?";
+    $stmt = $this->dbcon->prepare($sql);
+    $stmt->execute($data);
+    return $stmt;
+  }
+
+  public function approve_count()
+  {
+    $sql = "SELECT COUNT(*) FROM leave_request WHERE status = 1";
+    $stmt = $this->dbcon->prepare($sql);
+    $stmt->execute();
+    return $stmt->fetchColumn();
+  }
+
   public function service_select($keyword)
   {
     $sql = "SELECT id,name FROM leave_service WHERE status = 1";
@@ -49,7 +112,7 @@ class Request
 
   public function service_used($data)
   {
-    $sql = "SELECT DATEDIFF(end, start) as diff 
+    $sql = "SELECT DATEDIFF(end, start) + 1 as diff 
     FROM leave_request 
     WHERE status IN (1,2) 
     AND user_id = ? 
@@ -58,7 +121,29 @@ class Request
     $stmt = $this->dbcon->prepare($sql);
     $stmt->execute($data);
     $row = $stmt->fetch();
-    return (isset($row['diff']) ? $row['diff'] + 1 : 0);
+    return (isset($row['diff']) ? $row['diff'] : 0);
+  }
+
+  public function service_remain($service, $request)
+  {
+    $sql = "SELECT day FROM leave_service WHERE id = ?";
+    $stmt = $this->dbcon->prepare($sql);
+    $stmt->execute($service);
+    $service = $stmt->fetch();
+    $total = $service['day'];
+
+    $sql = "SELECT DATEDIFF(end, start) + 1 as diff 
+    FROM leave_request 
+    WHERE status IN (1,2) 
+    AND user_id = ? 
+    AND service_id = ?
+    AND YEAR(created) = ?";
+    $stmt = $this->dbcon->prepare($sql);
+    $stmt->execute($request);
+    $row = $stmt->fetch();
+    $used = (isset($row['diff']) ? $row['diff'] : 0);
+    $remain = $total - $used;
+    return $remain;
   }
 
   public function document_upload($tmp, $path)
